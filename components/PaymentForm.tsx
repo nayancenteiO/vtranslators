@@ -48,7 +48,7 @@ function PlanDetails({ onProceed }: { onProceed: () => void }) {
 
         <div className="space-y-4">
           <div className="bg-blue-50 p-4 rounded-lg">
-            <h3 className="font-semibold mb-2">What's included:</h3>
+            <h3 className="font-semibold mb-2">What&apos;s included:</h3>
             <ul className="space-y-3">
               <li className="flex items-center text-sm">
                 <svg className="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
