@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Translation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #ccc;
+        }
+        #output {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            min-height: 50px;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        #loading {
+            display: none;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Translation Test</h2>
+        <div>
+            <textarea id="input" placeholder="Enter text to translate"></textarea>
+        </div>
+        <div>
+            <button onclick="handleTranslate()">Translate to Japanese</button>
+            <span id="loading">Translating...</span>
+        </div>
+        <div>
+            <h3>Translation:</h3>
+            <div id="output"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = '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';
+        const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+
+        async function handleTranslate() {
+            const input = document.getElementById('input').value;
+            const output = document.getElementById('output');
+            const loading = document.getElementById('loading');
+            const button = document.querySelector('button');
+            
+            if (!input.trim()) {
+                output.innerHTML = '<span class="error">Please enter some text to translate</span>';
+                return;
+            }
+
+            try {
+                loading.style.display = 'inline';
+                button.disabled = true;
+                output.textContent = '';
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'HTTP-Referer': window.location.href,
+                        'X-Title': 'Translation Test'
+                    },
+                    body: JSON.stringify({
+                        model: 'google/gemini-pro',
+                        messages: [
+                            {
+                                role: 'system',
+                                content: 'You are a translator. Translate the following text to Japanese. Only respond with the translation, no explanations or additional text.'
+                            },
+                            {
+                                role: 'user',
+                                content: input
+                            }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                console.log('API Response:', data);
+                
+                if (data.choices && data.choices[0] && data.choices[0].message) {
+                    output.textContent = data.choices[0].message.content;
+                } else {
+                    output.innerHTML = '<span class="error">Translation failed: ' + JSON.stringify(data) + '</span>';
+                }
+            } catch (error) {
+                console.error('Translation error:', error);
+                output.innerHTML = '<span class="error">Error: ' + error.message + '</span>';
+            } finally {
+                loading.style.display = 'none';
+                button.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
